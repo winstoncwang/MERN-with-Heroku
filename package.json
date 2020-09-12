@@ -1,0 +1,26 @@
+{
+	"name": "hello-world-express-static",
+	"version": "1.0.0",
+	"description": "express server used to render html hello world page with use of JS",
+	"engines": {
+		"node": "12.16.2",
+		"npm": "6.14.4"
+	},
+	"main": "index.js",
+	"scripts": {
+		"start": "node index.js",
+		"test": "node test.js"
+	},
+	"dependencies": {
+		"express": "^4.15.2"
+	},
+	"devDependencies": {
+		"tape": "^4.7.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/winstoncwang/Sandbox/tree/master/hello-world-express-static"
+	},
+	"keywords": [ "node", "heroku", "express" ],
+	"license": "MIT"
+}

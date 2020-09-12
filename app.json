@@ -1,0 +1,8 @@
+{
+	"name": "Hello World using Node and Express",
+	"description": "Server that responds with a html file showing hello world",
+	"repository": "https://github.com/winstoncwang/Sandbox/tree/master/hello-world-express-static",
+	"logo": "",
+	"keywords": [ "node", "express", "heroku", "mocha", "supertest" ],
+	"image": "heroku/nodejs"
+}
