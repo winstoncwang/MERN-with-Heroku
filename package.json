@@ -11,7 +11,9 @@
 		"start": "node index.js",
 		"test": "node test.js"
 	},
-	"dependencies": {},
+	"dependencies": {
+		"express": "^4.17.1"
+	},
 	"devDependencies": {
 		"tape": "^4.7.0"
 	},
