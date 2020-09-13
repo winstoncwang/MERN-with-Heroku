@@ -15,7 +15,4 @@ describe('GET / to return something', function () {
 	it('respond 404 with other endpoints ', function (done) {
 		request(server).get('/random').expect(404, done);
 	});
-	it('respond with a file ', function (done) {
-		request(server).get('/').expect(404, done);
-	});
 });
