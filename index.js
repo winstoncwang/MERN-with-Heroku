@@ -2,11 +2,17 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const CORS = require('cors');
-const PORT = process.env.PORT || 5000;
+const config = require('./config/config');
+
+const apiRouter = require('./routes/index');
 
 app.use(CORS()).use(express.static(path.join(__dirname, 'public')));
 
-const server = app.listen(PORT, () => console.log(`Listening on ${PORT}`));
+app.use(apiRouter);
+
+const server = app.listen(config.port, () =>
+	console.log(`Listening on ${PORT}`)
+);
 
 //
 module.exports = server;

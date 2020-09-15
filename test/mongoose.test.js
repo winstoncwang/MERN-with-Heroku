@@ -3,18 +3,34 @@ require('sinon');
 require('sinon-mongoose');
 const assert = chai.assert;
 const expect = chai.expect;
+const apiModel = require('');
 
-describe('connect to mongodb using mongoose', () => {
-	//make a mongoose connection
-	let mongoose;
+describe('Api testing', () => {
+	//creating mock of apimodel
+	let ApiMock;
+
 	beforeEach(() => {
-		require('../index.js');
-		mongoose = require('mongoose');
+		ApiMock = sinon.mock(apiModel);
 	});
 
-	it('connection successfully', (done) => {
-		assert.strictEqual(mongoose.connection.readyState, 1, 'Connected');
-		done();
+	it('Get all collections successful', (done) => {
+		let expectedResult = {};
+		//expectation
+		ApiMock.expects('find')
+			.once()
+			.withArgs({})
+			.yields(null, expectedResult);
+
+		//use model.find() to get all data
+		//CREATED MODEL FOR SCHEMA hence able to use .find() without .exec()
+		apiModel.find({}, (err, result) => {
+			expect(result.status).to.be.true;
+		});
+
+		ApiMock.verify(); //load in expectation
+		ApiMock.restore(); //upload sandbox
+
+		done(); //close async test
 	});
 });
 
@@ -22,6 +38,3 @@ describe('connect to mongodb using mongoose', () => {
 1: connected
 2: connecting
 3: disconnecting */
-
-//get request from api
-describe();
