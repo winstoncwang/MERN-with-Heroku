@@ -11,7 +11,7 @@ app.use(CORS()).use(express.static(path.join(__dirname, 'public')));
 app.use(apiRouter);
 
 const server = app.listen(config.port, () =>
-	console.log(`Listening on ${PORT}`)
+	console.log(`Listening on ${config.port}`)
 );
 
 //
