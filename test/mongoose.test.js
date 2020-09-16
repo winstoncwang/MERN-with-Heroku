@@ -13,13 +13,16 @@ describe('Api testing', () => {
 		ApiMock = sinon.mock(apiModel);
 	});
 
-	it('Get all collections successful', (done) => {
-		let expectedResult = {};
+	afterEach(() => {
+		ApiMock.restore(); //upload sandbox
+	});
+
+	/* Get API Testing */
+
+	it('Get all data successful', (done) => {
+		let expectations = {};
 		//expectation
-		ApiMock.expects('find')
-			.once()
-			.withArgs({})
-			.yields(null, expectedResult);
+		ApiMock.expects('find').once().withArgs({}).yields(null, expectations);
 
 		//use model.find() to get all data
 		//CREATED MODEL FOR SCHEMA hence able to use .find() without .exec()
@@ -28,10 +31,24 @@ describe('Api testing', () => {
 		});
 
 		ApiMock.verify(); //load in expectation
-		ApiMock.restore(); //upload sandbox
 
 		done(); //close async test
 	});
+
+	it('Failed getting all data', () => {
+		let expectations = {};
+
+		ApiMock.expects('find').once.withArgs({}).yields(expectations, null);
+
+		apiModel.find({}, (err, result) => {
+			expect(err.status).to.be.not.true;
+		});
+
+		ApiMock.verify();
+		done();
+	});
+
+	it('');
 });
 
 /* 0: disconnected
