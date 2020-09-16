@@ -17,7 +17,7 @@ describe('Api testing', () => {
 		ApiMock.restore(); //upload sandbox
 	});
 
-	/* Get API Testing */
+	/* Get all endpoint */
 
 	it('Get all data successful', (done) => {
 		let expectations = {};
@@ -35,7 +35,7 @@ describe('Api testing', () => {
 		done(); //close async test
 	});
 
-	it('Failed getting all data', () => {
+	it('Get all data failed', () => {
 		let expectations = {};
 
 		ApiMock.expects('find').once.withArgs({}).yields(expectations, null);
@@ -48,7 +48,32 @@ describe('Api testing', () => {
 		done();
 	});
 
-	it('');
+	/* findById endpoint */
+	it('FindById successfull', () => {
+		let expectations = {
+			id             : 1284584,
+			firstName      : 'Bob',
+			secondName     : 'Windy',
+			age            : 24,
+			countryOfBirth : 'Canada'
+		};
+
+		ApiMock.expects('findById')
+			.once.withArgs(1284584)
+			.yields(null, expectations);
+
+		apiModel.find(1284584, (err, resultById) => {
+			expect(resultById).to.have
+				.property(id, 1284584)
+				.and.to.have.property(firstName, 'bob')
+				.and.to.have.property(secondName, 'Windy')
+				.and.to.have.property(age, 24)
+				.and.to.have.property(countryOfBirth, 'Canada');
+			expect(err).to.be.null;
+
+			ApiMock.verify();
+		});
+	});
 });
 
 /* 0: disconnected
