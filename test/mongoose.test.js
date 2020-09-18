@@ -1,16 +1,16 @@
 const chai = require('chai');
-require('sinon');
+const sinon = require('sinon');
 require('sinon-mongoose');
 const assert = chai.assert;
 const expect = chai.expect;
-const apiModel = require('../models/member.model');
+const Member = require('../models/member.model');
 
 describe('Api testing', () => {
 	//creating mock of apimodel
 	let ApiMock;
 
 	beforeEach(() => {
-		ApiMock = sinon.mock(apiModel);
+		ApiMock = sinon.mock(Member);
 	});
 
 	afterEach(() => {
@@ -20,13 +20,13 @@ describe('Api testing', () => {
 	/* Get all endpoint */
 
 	it('Get all data successful', (done) => {
-		let expectations = {};
+		let expectations = { status: true, member: {} };
 		//expectation
-		ApiMock.expects('find').once().withArgs({}).yields(null, expectations);
 
+		ApiMock.expects('find').once().withArgs({}).yields(null, expectations);
 		//use model.find() to get all data
 		//CREATED MODEL FOR SCHEMA hence able to use .find() without .exec()
-		apiModel.find({}, (err, result) => {
+		Member.find({}, (err, result) => {
 			expect(result.status).to.be.true;
 		});
 
@@ -35,12 +35,12 @@ describe('Api testing', () => {
 		done(); //close async test
 	});
 
-	it('Get all data failed', () => {
-		let expectations = {};
+	it('Get all data failed', (done) => {
+		let expectations = { status: false, error: 'failed to gather data' };
 
-		ApiMock.expects('find').once.withArgs({}).yields(expectations, null);
+		ApiMock.expects('find').once().withArgs({}).yields(expectations, null);
 
-		apiModel.find({}, (err, result) => {
+		Member.find({}, (err, result) => {
 			expect(err.status).to.be.not.true;
 		});
 
@@ -49,7 +49,7 @@ describe('Api testing', () => {
 	});
 
 	/* findById endpoint */
-	it('FindById successfull', () => {
+	it('FindById successfull', (done) => {
 		let expectations = {
 			id             : 1284584,
 			firstName      : 'Bob',
@@ -59,10 +59,13 @@ describe('Api testing', () => {
 		};
 
 		ApiMock.expects('findById')
-			.once.withArgs(1284584)
+			.once()
+			.withArgs(1284584)
 			.yields(null, expectations);
 
-		apiModel.find(1284584, (err, resultById) => {
+		console.log(ApiMock);
+		Member.findById(1284584, (err, resultById) => {
+			console.log(resultById);
 			expect(resultById).to.have
 				.property(id, 1284584)
 				.and.to.have.property(firstName, 'bob')
@@ -73,6 +76,8 @@ describe('Api testing', () => {
 
 			ApiMock.verify();
 		});
+
+		done();
 	});
 });
 
