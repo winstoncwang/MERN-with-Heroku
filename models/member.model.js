@@ -15,7 +15,7 @@ const memberSchema = new Schema({
 		year  : { type: Number, required: true }
 	},
 	password            : {},
-	membershipApp       : []
+	membershipOf        : []
 });
 
 //model

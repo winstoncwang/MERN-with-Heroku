@@ -5,81 +5,133 @@ const assert = chai.assert;
 const expect = chai.expect;
 const Member = require('../models/member.model');
 
-describe('Api testing', () => {
-	//creating mock of apimodel
-	let ApiMock;
+describe('CRUD Mongoose', () => (
+	describe('Create API testing', () => {
+		/* save() tests */
+		it('save() successful', (done) => {
+			let newMemberObj = new Member(
+				new Member({ username: 'memberOne' })
+			);
 
-	beforeEach(() => {
-		ApiMock = sinon.mock(Member);
-	});
+			let ApiMock = sinon.mock(newMemberObj);
 
-	afterEach(() => {
-		ApiMock.restore(); //upload sandbox
-	});
+			let expectation = { status: true };
 
-	/* Get all endpoint */
+			ApiMock.expects('save').once().yields(null, expectation);
 
-	it('Get all data successful', (done) => {
-		let expectations = { status: true, member: {} };
-		//expectation
+			newMemberObj.save((error, doc) => {
+				expect(doc.status).to.be.true;
+				ApiMock.verify();
+				ApiMock.restore();
+				done();
+			});
+		});
+	}),
+	describe('Read API testing', () => {
+		//creating mock of apimodel
+		let ApiMock;
 
-		ApiMock.expects('find').once().withArgs({}).yields(null, expectations);
-		//use model.find() to get all data
-		//CREATED MODEL FOR SCHEMA hence able to use .find() without .exec()
-		Member.find({}, (err, result) => {
-			expect(result.status).to.be.true;
+		beforeEach(() => {
+			ApiMock = sinon.mock(Member);
 		});
 
-		ApiMock.verify(); //load in expectation
-
-		done(); //close async test
-	});
-
-	it('Get all data failed', (done) => {
-		let expectations = { status: false, error: 'failed to gather data' };
-
-		ApiMock.expects('find').once().withArgs({}).yields(expectations, null);
-
-		Member.find({}, (err, result) => {
-			expect(err.status).to.be.not.true;
+		afterEach(() => {
+			ApiMock.restore(); //upload sandbox
 		});
 
-		ApiMock.verify();
-		done();
-	});
+		/* find() tests */
+		it('find() successful', (done) => {
+			let expectations = { status: true, member: {} };
+			//expectation
 
-	/* findById endpoint */
-	it('FindById successfull', (done) => {
-		let expectations = {
-			id             : 1284584,
-			firstName      : 'Bob',
-			secondName     : 'Windy',
-			age            : 24,
-			countryOfBirth : 'Canada'
-		};
+			ApiMock.expects('find')
+				.once()
+				.withArgs({})
+				.yields(null, expectations);
+			//use model.find() to get all data
+			//CREATED MODEL FOR SCHEMA hence able to use .find() without .exec()
+			Member.find({}, (err, result) => {
+				expect(result.status).to.be.true;
+			});
 
-		ApiMock.expects('findById')
-			.once()
-			.withArgs(1284584)
-			.yields(null, expectations);
+			ApiMock.verify(); //load in expectation
 
-		console.log(ApiMock);
-		Member.findById(1284584, (err, resultById) => {
-			console.log(resultById);
-			expect(resultById).to.have
-				.property(id, 1284584)
-				.and.to.have.property(firstName, 'bob')
-				.and.to.have.property(secondName, 'Windy')
-				.and.to.have.property(age, 24)
-				.and.to.have.property(countryOfBirth, 'Canada');
-			expect(err).to.be.null;
+			done(); //close async test
+		});
+
+		it('find() failed', (done) => {
+			let expectations = {
+				status : false,
+				error  : 'failed to gather data'
+			};
+
+			ApiMock.expects('find')
+				.once()
+				.withArgs({})
+				.yields(expectations, null);
+
+			Member.find({}, (err, result) => {
+				expect(err.status).to.be.not.true;
+			});
 
 			ApiMock.verify();
+			done();
 		});
 
-		done();
-	});
-});
+		/* findById() tests */
+		it('findById() successfull', (done) => {
+			let expectations = {
+				_id            : 1284584,
+				firstName      : 'Bob',
+				secondName     : 'Windy',
+				age            : 24,
+				countryOfBirth : 'Canada'
+			};
+
+			ApiMock.expects('findById')
+				.once()
+				.withArgs(1284584)
+				.yields(null, expectations);
+
+			Member.findById(1284584, (err, resultById) => {
+				expect(resultById).to.have.own.property(
+					'_id',
+					1284584,
+					'firstName',
+					'Bob',
+					'secondName',
+					'Windy',
+					'age',
+					24,
+					'countryOfBirth',
+					'Canada'
+				);
+				expect(err).to.be.null;
+
+				ApiMock.verify();
+			});
+
+			done();
+		});
+
+		it('findById() failed', (done) => {
+			//expectation and return result
+			let expectation = { status: false, error: 'no such user exist' };
+			ApiMock.expects('findById')
+				.once()
+				.withArgs(1284584)
+				.yields(expectation, null);
+			//mongoose callback
+			Member.findById(1284584, (err, result) => {
+				expect(result).to.be.null;
+				expect(err.status).to.be.false;
+				expect(err.error).to.be.string;
+			});
+			ApiMock.verify();
+			done();
+		});
+	})
+));
 
 /* 0: disconnected
 1: connected
