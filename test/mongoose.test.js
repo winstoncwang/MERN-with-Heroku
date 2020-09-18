@@ -3,7 +3,7 @@ require('sinon');
 require('sinon-mongoose');
 const assert = chai.assert;
 const expect = chai.expect;
-const apiModel = require('');
+const apiModel = require('../models/member.model');
 
 describe('Api testing', () => {
 	//creating mock of apimodel
