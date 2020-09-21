@@ -10,7 +10,7 @@ describe('CRUD Mongoose', () => (
 		/* save() tests */
 		it('save() successful', (done) => {
 			let newMemberObj = new Member(
-				new Member({ username: 'memberOne' })
+				new Member({ username: 'memberOne' }) //where username is the required field
 			);
 
 			let ApiMock = sinon.mock(newMemberObj);
@@ -30,6 +30,26 @@ describe('CRUD Mongoose', () => (
 	describe('Read API testing', () => {
 		//creating mock of apimodel
 		let ApiMock;
+		let findSuccess;
+		let findFail;
+		let findByIdSuccess;
+		let findByIdFail;
+
+		before(() => {
+			findSuccess = { status: true, member: {} };
+			findFail = {
+				status : false,
+				error  : 'failed to gather data'
+			};
+			findByIdSuccess = {
+				_id            : 1284584,
+				firstName      : 'Bob',
+				secondName     : 'Windy',
+				age            : 24,
+				countryOfBirth : 'Canada'
+			};
+			findByIdFail = { status: false, error: 'no such user exist' };
+		});
 
 		beforeEach(() => {
 			ApiMock = sinon.mock(Member);
@@ -41,13 +61,12 @@ describe('CRUD Mongoose', () => (
 
 		/* find() tests */
 		it('find() successful', (done) => {
-			let expectations = { status: true, member: {} };
 			//expectation
 
 			ApiMock.expects('find')
 				.once()
 				.withArgs({})
-				.yields(null, expectations);
+				.yields(null, findSuccess);
 			//use model.find() to get all data
 			//CREATED MODEL FOR SCHEMA hence able to use .find() without .exec()
 			Member.find({}, (err, result) => {
@@ -55,20 +74,11 @@ describe('CRUD Mongoose', () => (
 			});
 
 			ApiMock.verify(); //load in expectation
-
-			done(); //close async test
+			done();
 		});
 
 		it('find() failed', (done) => {
-			let expectations = {
-				status : false,
-				error  : 'failed to gather data'
-			};
-
-			ApiMock.expects('find')
-				.once()
-				.withArgs({})
-				.yields(expectations, null);
+			ApiMock.expects('find').once().withArgs({}).yields(findFail, null);
 
 			Member.find({}, (err, result) => {
 				expect(err.status).to.be.not.true;
@@ -80,18 +90,10 @@ describe('CRUD Mongoose', () => (
 
 		/* findById() tests */
 		it('findById() successfull', (done) => {
-			let expectations = {
-				_id            : 1284584,
-				firstName      : 'Bob',
-				secondName     : 'Windy',
-				age            : 24,
-				countryOfBirth : 'Canada'
-			};
-
 			ApiMock.expects('findById')
 				.once()
 				.withArgs(1284584)
-				.yields(null, expectations);
+				.yields(null, findByIdSuccess);
 
 			Member.findById(1284584, (err, resultById) => {
 				expect(resultById).to.have.own.property(
@@ -109,18 +111,16 @@ describe('CRUD Mongoose', () => (
 				expect(err).to.be.null;
 
 				ApiMock.verify();
+				done();
 			});
-
-			done();
 		});
 
 		it('findById() failed', (done) => {
 			//expectation and return result
-			let expectation = { status: false, error: 'no such user exist' };
 			ApiMock.expects('findById')
 				.once()
 				.withArgs(1284584)
-				.yields(expectation, null);
+				.yields(findByIdFail, null);
 			//mongoose callback
 			Member.findById(1284584, (err, result) => {
 				expect(result).to.be.null;
