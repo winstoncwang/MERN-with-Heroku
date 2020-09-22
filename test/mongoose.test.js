@@ -49,14 +49,12 @@ describe('CRUD Mongoose', () => (
 				countryOfBirth : 'Canada'
 			};
 			findByIdFail = { status: false, error: 'no such user exist' };
-		});
-
-		beforeEach(() => {
 			ApiMock = sinon.mock(Member);
 		});
 
-		afterEach(() => {
-			ApiMock.restore(); //upload sandbox
+		after(() => {
+			ApiMock.verify(); //verifies the expectations from first to last and restore()
+			ApiMock.restore(); //Resets the original method
 		});
 
 		/* find() tests */
@@ -67,35 +65,40 @@ describe('CRUD Mongoose', () => (
 				.once()
 				.withArgs({})
 				.yields(null, findSuccess);
+
 			//use model.find() to get all data
 			//CREATED MODEL FOR SCHEMA hence able to use .find() without .exec()
+			console.log(ApiMock);
 			Member.find({}, (err, result) => {
 				expect(result.status).to.be.true;
+				done();
 			});
-
-			ApiMock.verify(); //load in expectation
-			done();
 		});
 
 		it('find() failed', (done) => {
-			ApiMock.expects('find').once().withArgs({}).yields(findFail, null);
-
-			Member.find({}, (err, result) => {
+			console.log('after verify', ApiMock);
+			ApiMock.expects('find')
+				.once()
+				.withArgs({ _id: 1234 })
+				.yields(findFail, null);
+			console.log('after new expects', ApiMock);
+			Member.find({ _id: 1234 }, (err, result) => {
 				expect(err.status).to.be.not.true;
-			});
 
-			ApiMock.verify();
-			done();
+				ApiMock.verify();
+				ApiMock.restore();
+				done();
+			});
 		});
 
 		/* findById() tests */
 		it('findById() successfull', (done) => {
 			ApiMock.expects('findById')
 				.once()
-				.withArgs(1284584)
+				.withArgs(1284583)
 				.yields(null, findByIdSuccess);
-
-			Member.findById(1284584, (err, resultById) => {
+			console.log(ApiMock);
+			Member.findById(1284583, (err, resultById) => {
 				expect(resultById).to.have.own.property(
 					'_id',
 					1284584,
@@ -109,8 +112,6 @@ describe('CRUD Mongoose', () => (
 					'Canada'
 				);
 				expect(err).to.be.null;
-
-				ApiMock.verify();
 				done();
 			});
 		});
@@ -127,7 +128,6 @@ describe('CRUD Mongoose', () => (
 				expect(err.status).to.be.false;
 				expect(err.error).to.be.string;
 			});
-			ApiMock.verify();
 			done();
 		});
 	})
