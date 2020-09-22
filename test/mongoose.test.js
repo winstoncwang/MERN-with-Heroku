@@ -54,7 +54,6 @@ describe('CRUD Mongoose', () => (
 
 		after(() => {
 			ApiMock.verify(); //verifies the expectations from first to last and restore()
-			ApiMock.restore(); //Resets the original method
 		});
 
 		/* find() tests */
@@ -68,7 +67,6 @@ describe('CRUD Mongoose', () => (
 
 			//use model.find() to get all data
 			//CREATED MODEL FOR SCHEMA hence able to use .find() without .exec()
-			console.log(ApiMock);
 			Member.find({}, (err, result) => {
 				expect(result.status).to.be.true;
 				done();
@@ -76,17 +74,13 @@ describe('CRUD Mongoose', () => (
 		});
 
 		it('find() failed', (done) => {
-			console.log('after verify', ApiMock);
 			ApiMock.expects('find')
 				.once()
 				.withArgs({ _id: 1234 })
 				.yields(findFail, null);
-			console.log('after new expects', ApiMock);
+
 			Member.find({ _id: 1234 }, (err, result) => {
 				expect(err.status).to.be.not.true;
-
-				ApiMock.verify();
-				ApiMock.restore();
 				done();
 			});
 		});
@@ -97,7 +91,7 @@ describe('CRUD Mongoose', () => (
 				.once()
 				.withArgs(1284583)
 				.yields(null, findByIdSuccess);
-			console.log(ApiMock);
+
 			Member.findById(1284583, (err, resultById) => {
 				expect(resultById).to.have.own.property(
 					'_id',
