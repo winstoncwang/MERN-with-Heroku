@@ -6,7 +6,7 @@ const expect = chai.expect;
 const Member = require('../models/member.model');
 
 describe('CRUD Mongoose', () => (
-	describe('Create API testing', () => {
+	describe('Create API tests', () => {
 		let newMembObjSuccess;
 		let newMembObjFailed;
 		let ApiSuccessMock;
@@ -116,7 +116,7 @@ describe('CRUD Mongoose', () => (
 			done();
 		});
 	}),
-	describe('Read API testing', () => {
+	describe('Read API tests', () => {
 		//creating mock of apimodel
 		let ApiMock;
 		let expectationFindSuccess;
@@ -147,10 +147,7 @@ describe('CRUD Mongoose', () => (
 
 		after(() => {
 			ApiMock.verify(); //verifies the expectations from first to last and restore()
-<<<<<<< HEAD
-=======
 			//ApiMock.restore(); //Resets the original method
->>>>>>> master
 		});
 
 		/* find() tests */
@@ -175,18 +172,11 @@ describe('CRUD Mongoose', () => (
 			ApiMock.expects('find')
 				.once()
 				.withArgs({ _id: 1234 })
-<<<<<<< HEAD
-				.yields(findFail, null);
-
-			Member.find({ _id: 1234 }, (err, result) => {
-				expect(err.status).to.be.not.true;
-=======
 				.yields(expectationFindFail, null);
 
 			Member.find({ _id: 1234 }, (err, result) => {
 				expect(err.status).to.be.not.true;
 				expect(result).to.be.null;
->>>>>>> master
 				done();
 			});
 		});
@@ -196,11 +186,7 @@ describe('CRUD Mongoose', () => (
 			ApiMock.expects('findById')
 				.once()
 				.withArgs(1284583)
-<<<<<<< HEAD
-				.yields(null, findByIdSuccess);
-=======
 				.yields(null, expectationFindByIdSuccess);
->>>>>>> master
 
 			Member.findById(1284583, (err, resultById) => {
 				expect(resultById).to.have.own.property(
@@ -235,7 +221,7 @@ describe('CRUD Mongoose', () => (
 			done();
 		});
 	}),
-	describe('Update API test', () => {
+	describe('Update API tests', () => {
 		let ApiMock;
 		let expectationUpdateOneFailed;
 		let expectationUpdateOneSuccess;
@@ -304,6 +290,55 @@ describe('CRUD Mongoose', () => (
 				},
 				done(),
 			);
+		});
+	}),
+	describe('Delete API tests', () => {
+		let ApiMock;
+		let expectationDeleteOneFailed;
+		let expectationDeleteOneSuccess;
+
+		before(() => {
+			ApiMock = sinon.mock(Member);
+			expectationDeleteOneSuccess = { status: 200, response: {} };
+			expectationDeleteOneFailed = {
+				status: 400,
+				response: { err: 'Deletion failed.' },
+			};
+		});
+
+		after(() => {
+			ApiMock.verify();
+		});
+
+		it('deleteOne() successful', (done) => {
+			ApiMock.expects('deleteOne')
+				.once()
+				.withArgs({ username: 'winstoncwang' })
+				.yields(null, expectationDeleteOneSuccess);
+
+			Member.deleteOne({ username: 'winstoncwang' }, (err, result) => {
+				expect(err).to.be.null;
+				expect(result.status).to.equal(200);
+				expect(result.response).to.be.empty;
+			});
+			done();
+		});
+
+		it('deleteOne() failed', (done) => {
+			ApiMock.expects('deleteOne')
+				.once()
+				.withArgs({ username: 'newuser' })
+				.yields(expectationDeleteOneFailed, null);
+
+			Member.deleteOne({ username: 'newuser' }, (err, result) => {
+				expect(result).to.be.null;
+				expect(err.status).to.equal(400);
+				expect(err.response).to.have.ownProperty(
+					'err',
+					'Deletion failed.',
+				);
+			});
+			done();
 		});
 	})
 ));
