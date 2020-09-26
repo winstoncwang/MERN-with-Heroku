@@ -7,53 +7,150 @@ const Member = require('../models/member.model');
 
 describe('CRUD Mongoose', () => (
 	describe('Create API testing', () => {
-		/* save() tests */
-		it('save() successful', (done) => {
-			let newMemberObj = new Member(
-				new Member({ username: 'memberOne' }) //where username is the required field
+		let newMembObjSuccess;
+		let newMembObjFailed;
+		let ApiSuccessMock;
+		let ApiFailedMock;
+
+		before(() => {
+			newMembObjSuccess = new Member({
+				username: 'winstoncwang',
+				firstname: 'Winston',
+				familyname: 'Wang',
+				age: 13,
+				dob: {
+					date: 15,
+					month: 1,
+					year: 2007,
+				},
+				password: 'encryptedstring',
+			}); //where username is the required field
+			newMembObjFailed = new Member(
+				{ username: 'memberOne' }, //where username is the required field
 			);
 
-			let ApiMock = sinon.mock(newMemberObj);
+			ApiSuccessMock = sinon.mock(newMembObjSuccess);
+			ApiFailedMock = sinon.mock(newMembObjFailed);
 
-			let expectation = { status: true };
+			expectationSuccess = {
+				status: 200,
+				response: {
+					accountcreationdate: '2020-09-26T01:05:38.711Z',
+					accountupdatedate: '2020-09-26T01:05:38.711Z',
+					_id: '5f6e9602cbc91a464877d9e6',
+					username: 'winstoncwang',
+					firstname: 'Winston',
+					familyname: 'Wang',
+					age: 13,
+					dob: {
+						date: 15,
+						month: 1,
+						year: 2007,
+					},
+					password: 'encryptedstring',
+					__v: 0,
+				},
+			};
+			expectationFailed = {
+				status: 400,
+				error: {
+					ValidationError:
+						'dob.year: Path `dob.year` is required., dob.month: Path `dob.month` is required., dob.date: Path `dob.date` is required.',
+				},
+			};
+		});
 
-			ApiMock.expects('save').once().yields(null, expectation);
+		after(() => {
+			ApiSuccessMock.verify();
+			ApiFailedMock.verify();
+		});
 
-			newMemberObj.save((error, doc) => {
-				expect(doc.status).to.be.true;
-				ApiMock.verify();
-				ApiMock.restore();
+		/* save() tests */
+		it('save() successful', (done) => {
+			ApiSuccessMock.expects('save')
+				.once()
+				.yields(null, expectationSuccess);
+
+			newMembObjSuccess.save((error, result) => {
+				assert.strictEqual(result.status, 200, 'status code:200');
+				expect(result.response).to.have.ownProperty(
+					'accountcreationdate',
+					'2020-09-26T01:05:38.711Z',
+					'accountupdatedate',
+					'2020-09-26T01:05:38.711Z',
+					'_id',
+					'5f6e9602cbc91a464877d9e6',
+					'username',
+					'winstoncwang',
+					'firstname',
+					'Winston',
+					'familyname',
+					'Wang',
+					'age',
+					13,
+					'dob',
+					{
+						date: 15,
+						month: 1,
+						year: 2007,
+					},
+					'password',
+					'encryptedstring',
+					'__v',
+					0,
+				);
+				expect(error).to.be.null;
 				done();
 			});
+		});
+		it('save() failed', (done) => {
+			ApiFailedMock.expects('save')
+				.once()
+				.yields(expectationFailed, null);
+
+			newMembObjFailed.save((err, result) => {
+				expect(result).to.be.null;
+				assert.strictEqual(err.status, 400, 'status code:400');
+				expect(err.error).to.have.ownProperty('ValidationError');
+			});
+			done();
 		});
 	}),
 	describe('Read API testing', () => {
 		//creating mock of apimodel
 		let ApiMock;
-		let findSuccess;
-		let findFail;
-		let findByIdSuccess;
-		let findByIdFail;
+		let expectationFindSuccess;
+		let expectationFindFail;
+		let expectationFindByIdSuccess;
+		let expectationFindByIdFail;
 
 		before(() => {
-			findSuccess = { status: true, member: {} };
-			findFail = {
-				status : false,
-				error  : 'failed to gather data'
-			};
-			findByIdSuccess = {
-				_id            : 1284584,
-				firstName      : 'Bob',
-				secondName     : 'Windy',
-				age            : 24,
-				countryOfBirth : 'Canada'
-			};
-			findByIdFail = { status: false, error: 'no such user exist' };
 			ApiMock = sinon.mock(Member);
+
+			expectationFindSuccess = { status: true, member: {} };
+			expectationFindFail = {
+				status: false,
+				error: 'failed to gather data',
+			};
+			expectationFindByIdSuccess = {
+				_id: 1284584,
+				firstName: 'Bob',
+				secondName: 'Windy',
+				age: 24,
+				countryOfBirth: 'Canada',
+			};
+			expectationFindByIdFail = {
+				status: false,
+				error: 'no such user exist',
+			};
 		});
 
 		after(() => {
 			ApiMock.verify(); //verifies the expectations from first to last and restore()
+<<<<<<< HEAD
+=======
+			//ApiMock.restore(); //Resets the original method
+>>>>>>> master
 		});
 
 		/* find() tests */
@@ -63,12 +160,13 @@ describe('CRUD Mongoose', () => (
 			ApiMock.expects('find')
 				.once()
 				.withArgs({})
-				.yields(null, findSuccess);
+				.yields(null, expectationFindSuccess);
 
 			//use model.find() to get all data
 			//CREATED MODEL FOR SCHEMA hence able to use .find() without .exec()
 			Member.find({}, (err, result) => {
 				expect(result.status).to.be.true;
+				expect(err).to.be.null;
 				done();
 			});
 		});
@@ -77,10 +175,18 @@ describe('CRUD Mongoose', () => (
 			ApiMock.expects('find')
 				.once()
 				.withArgs({ _id: 1234 })
+<<<<<<< HEAD
 				.yields(findFail, null);
 
 			Member.find({ _id: 1234 }, (err, result) => {
 				expect(err.status).to.be.not.true;
+=======
+				.yields(expectationFindFail, null);
+
+			Member.find({ _id: 1234 }, (err, result) => {
+				expect(err.status).to.be.not.true;
+				expect(result).to.be.null;
+>>>>>>> master
 				done();
 			});
 		});
@@ -90,7 +196,11 @@ describe('CRUD Mongoose', () => (
 			ApiMock.expects('findById')
 				.once()
 				.withArgs(1284583)
+<<<<<<< HEAD
 				.yields(null, findByIdSuccess);
+=======
+				.yields(null, expectationFindByIdSuccess);
+>>>>>>> master
 
 			Member.findById(1284583, (err, resultById) => {
 				expect(resultById).to.have.own.property(
@@ -103,7 +213,7 @@ describe('CRUD Mongoose', () => (
 					'age',
 					24,
 					'countryOfBirth',
-					'Canada'
+					'Canada',
 				);
 				expect(err).to.be.null;
 				done();
@@ -115,7 +225,7 @@ describe('CRUD Mongoose', () => (
 			ApiMock.expects('findById')
 				.once()
 				.withArgs(1284584)
-				.yields(findByIdFail, null);
+				.yields(expectationFindByIdFail, null);
 			//mongoose callback
 			Member.findById(1284584, (err, result) => {
 				expect(result).to.be.null;
@@ -124,10 +234,76 @@ describe('CRUD Mongoose', () => (
 			});
 			done();
 		});
+	}),
+	describe('Update API test', () => {
+		let ApiMock;
+		let expectationUpdateOneFailed;
+		let expectationUpdateOneSuccess;
+
+		before(() => {
+			ApiMock = sinon.mock(Member);
+
+			expectationUpdateOneSuccess = {
+				status: 200,
+				response: { n: 1, nModified: 1, ok: 1 },
+			};
+			expectationUpdateOneFailed = {
+				status: 400,
+				DocumentNotFoundError: '$filename not found.',
+			};
+		});
+
+		after(() => {
+			ApiMock.verify();
+		});
+
+		it('updateOne() successful', (done) => {
+			ApiMock.expects('updateOne')
+				.once()
+				.withArgs({ username: 'winstoncwang' }, { $set: { age: 55 } })
+				.yields(null, expectationUpdateOneSuccess);
+
+			Member.updateOne(
+				{ username: 'winstoncwang' },
+				{ $set: { age: 55 } },
+				(error, result) => {
+					expect(result.status).to.equal(200);
+					expect(result.response).to.have.ownProperty(
+						'n',
+						1,
+						'nModified',
+						1,
+						'ok',
+						1,
+					);
+					expect(error).to.be.null;
+				},
+			);
+			done();
+		});
+
+		it('updateOne() failed', (done) => {
+			ApiMock.expects('updateOne')
+				.once()
+				.withArgs(
+					{ username: 'winstoncwang' },
+					{ $set: { age: 55, password: 'encryptedString' } },
+				)
+				.yields(expectationUpdateOneFailed, null);
+
+			Member.updateOne(
+				{ username: 'winstoncwang' },
+				{ $set: { age: 55, password: 'encryptedString' } },
+				(err, result) => {
+					expect(result).to.be.null;
+					expect(err.status).to.equal(400);
+					expect(err.response).to.have.ownProperty(
+						'DocumentNotFoundError',
+						'$filename not found.',
+					);
+				},
+				done(),
+			);
+		});
 	})
 ));
-
-/* 0: disconnected
-1: connected
-2: connecting
-3: disconnecting */
